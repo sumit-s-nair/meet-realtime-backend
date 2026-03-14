@@ -6,8 +6,8 @@ import { TypeOrmModule } from "@nestjs/typeorm"
 import { User } from "./users/user.entity"
 
 
-import { MeetingModule } from './meeting/meeting.module';
 import { UsersModule } from './users/users.module';
+import { MeetingsModule } from './meetings/meetings.module';
 
 @Module({
   imports: [ConfigModule.forRoot({
@@ -20,7 +20,7 @@ import { UsersModule } from './users/users.module';
     autoLoadEntities: true,
     synchronize: true
   }),
-    MeetingModule, UsersModule,
+    UsersModule, MeetingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
