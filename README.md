@@ -1,98 +1,175 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Meet Realtime Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Backend API for guest users, meeting creation, and LiveKit access-token generation.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Built with NestJS, TypeORM, PostgreSQL, and LiveKit Server SDK.
 
-## Description
+## Frontend
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Frontend repository: https://github.com/sumit-s-nair/meet-electron-client
+- Hosted live demo: https://meet-lite.vercel.app/
 
-## Project setup
+## Prerequisites
 
-```bash
-$ pnpm install
+- Node.js 20+
+- pnpm 9+
+- PostgreSQL database (local or hosted)
+- LiveKit project credentials
+
+## Environment Variables
+
+Create a `.env` file in the project root:
+
+```env
+DATABASE_URL=postgresql://username:password@host:5432/dbname
+LIVEKIT_URL=wss://your-livekit-host
+LIVEKIT_API_KEY=your_livekit_api_key
+LIVEKIT_SECRET=your_livekit_api_secret
+PORT=3000
 ```
 
-## Compile and run the project
+Notes:
+- The backend currently reads `LIVEKIT_SECRET` for token signing.
+- `LIVEKIT_URL` is used by clients for connecting to LiveKit, not by token generation in this service.
+- Database schema is auto-synced on startup (`synchronize: true`), which is convenient for development.
+
+## Run LiveKit Locally (Docker)
+
+You can run a local LiveKit server with:
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+docker run --rm -p 7880:7880 -p 7881:7881 -p 50000-50100:50000-50100/udp -e LIVEKIT_KEYS="devkey: secret" livekit/livekit-server --dev
 ```
 
-## Run tests
+Then update your `.env` values to match the key pair you set in `LIVEKIT_KEYS`:
+
+```env
+LIVEKIT_URL=ws://localhost:7880
+LIVEKIT_API_KEY=devkey
+LIVEKIT_SECRET=secret
+```
+
+If you change `devkey` or `secret`, make the same changes in your backend `.env` so token generation works.
+
+## Install Dependencies
+
+```bash
+pnpm install
+```
+
+## Run the Application
+
+```bash
+# watch mode (recommended for development)
+pnpm run start:dev
+
+# single run
+pnpm run start
+
+# production build + run
+pnpm run build
+pnpm run start:prod
+```
+
+Server starts on `http://localhost:3000` by default.
+
+## Test Commands
 
 ```bash
 # unit tests
-$ pnpm run test
+pnpm run test
 
 # e2e tests
-$ pnpm run test:e2e
+pnpm run test:e2e
 
-# test coverage
-$ pnpm run test:cov
+# coverage
+pnpm run test:cov
 ```
 
-## Deployment
+## API Overview
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+Base URL: `http://localhost:3000`
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 1 Health Check
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+curl http://localhost:3000
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### 2 Create Guest User
 
-## Resources
+```bash
+curl -X POST http://localhost:3000/users/guest \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Sumit"}'
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+Example response:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```json
+{
+  "id": "4f469a34-2ec6-4f57-a648-75f456ee9b11",
+  "name": "Sumit",
+  "createdAt": "2026-03-15T10:30:00.000Z"
+}
+```
 
-## Support
+### 3 Fetch User by ID
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+curl http://localhost:3000/users/<userId>
+```
 
-## Stay in touch
+### 4 Create Meeting
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```bash
+curl -X POST http://localhost:3000/meetings \
+  -H "Content-Type: application/json" \
+  -d '{"userId":"<userId>"}'
+```
+
+Example response:
+
+```json
+{
+  "id": "abc-def-ghi",
+  "createdBy": "4f469a34-2ec6-4f57-a648-75f456ee9b11",
+  "createdAt": "2026-03-15T10:31:00.000Z"
+}
+```
+
+### 5 Fetch Meeting by ID
+
+```bash
+curl http://localhost:3000/meetings/<meetingId>
+```
+
+### 6 Generate LiveKit Token
+
+```bash
+curl "http://localhost:3000/meetings/<meetingId>/token?userId=<userId>"
+```
+
+Example response:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI..."
+}
+```
+
+Use this JWT on your frontend LiveKit client when joining the same room ID (`<meetingId>`).
+
+## Typical Local Flow
+
+1. Start backend with `pnpm run start:dev`.
+2. Create a guest user and copy the returned `id`.
+3. Create a meeting using that user ID.
+4. Request a token for that meeting and user.
+5. Join LiveKit room from your frontend with:
+   - `url = LIVEKIT_URL`
+   - `token = token` from `/meetings/:id/token`
 
 ## License
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+UNLICENSED

@@ -15,8 +15,21 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return api info with health and endpoints', () => {
+      expect(appController.getApiInfo()).toEqual(
+        expect.objectContaining({
+          name: 'Meet Realtime Backend',
+          status: 'ok',
+          frontendUrl: 'https://github.com/sumit-s-nair/meet-electron-client',
+          liveDemoUrl: 'https://meet-lite.vercel.app/',
+          health: { service: 'up' },
+          endpoints: expect.arrayContaining([
+            expect.objectContaining({ method: 'GET', path: '/' }),
+            expect.objectContaining({ method: 'POST', path: '/users/guest' }),
+            expect.objectContaining({ method: 'POST', path: '/meetings' }),
+          ]),
+        }),
+      );
     });
   });
 });

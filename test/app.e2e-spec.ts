@@ -20,6 +20,21 @@ describe('AppController (e2e)', () => {
     return request(app.getHttpServer())
       .get('/')
       .expect(200)
-      .expect('Hello World!');
+      .expect((res) => {
+        expect(res.body).toEqual(
+          expect.objectContaining({
+            name: 'Meet Realtime Backend',
+            status: 'ok',
+            frontendUrl: 'https://github.com/sumit-s-nair/meet-electron-client',
+            liveDemoUrl: 'https://meet-lite.vercel.app/',
+            health: { service: 'up' },
+            endpoints: expect.arrayContaining([
+              expect.objectContaining({ method: 'GET', path: '/' }),
+              expect.objectContaining({ method: 'POST', path: '/users/guest' }),
+              expect.objectContaining({ method: 'POST', path: '/meetings' }),
+            ]),
+          }),
+        );
+      });
   });
 });
