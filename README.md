@@ -172,4 +172,4 @@ Use this JWT on your frontend LiveKit client when joining the same room ID (`<me
 
 ## License
 
-UNLICENSED
+MIT
